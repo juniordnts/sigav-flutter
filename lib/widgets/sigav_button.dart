@@ -1,0 +1,93 @@
+// ignore_for_file: use_key_in_widget_constructors, avoid_print
+// ignore_for_file: prefer_const_constructors
+
+import 'package:flutter/material.dart';
+import 'package:sigav_app/screens/class_page.dart';
+import 'package:sigav_app/screens/signin_page.dart';
+
+class SigavButton extends StatelessWidget {
+  final String title;
+  final VoidCallback action;
+  final bool? small;
+  final bool? disabled;
+  final bool? secondary;
+  final bool? red;
+
+  const SigavButton({
+    required this.title,
+    required this.action,
+    this.small,
+    this.disabled,
+    this.secondary,
+    this.red,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Color mainColor;
+    if (red == true) {
+      mainColor = Colors.red.shade600;
+    } else {
+      mainColor = Colors.blue.shade400;
+    }
+
+    return Container(
+      width: double.infinity,
+      height: small == true ? 40 : null,
+      decoration: BoxDecoration(
+        color: secondary == true ? null : mainColor,
+        border: secondary == true ? Border.all(color: mainColor) : null,
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: InkWell(
+        onTap: () {
+          action();
+        },
+        // onTap: () {
+        //   Navigator.push(
+        //       context, MaterialPageRoute(builder: (context) => ClassPage()));
+        //   // Navigator.push(context,
+        //   //     MaterialPageRoute(builder: (context) => FinishSigninPage()));
+        // },
+        child: Padding(
+          padding: small == true ? EdgeInsets.all(5) : EdgeInsets.all(20.0),
+          child: Center(
+            child: Text(title,
+                style: TextStyle(
+                    fontSize: small == true ? 18 : 20,
+                    fontWeight: FontWeight.bold,
+                    color: secondary == true ? mainColor : Colors.white)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SigavCircleIcon extends StatelessWidget {
+  final Icon icon;
+  final VoidCallback action;
+  final bool? disabled;
+  final bool? blue;
+
+  const SigavCircleIcon(
+      {required this.icon, required this.action, this.blue, this.disabled});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        action();
+      },
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+            color: blue == true ? Colors.blue.shade400 : null,
+            border: blue == true ? null : Border.all(color: Colors.black26),
+            borderRadius: BorderRadius.circular(30)),
+        child: icon,
+      ),
+    );
+  }
+}
