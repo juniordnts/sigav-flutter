@@ -2,8 +2,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:sigav_app/screens/class_page.dart';
-import 'package:sigav_app/screens/signin_page.dart';
 
 class SigavButton extends StatelessWidget {
   final String title;
@@ -11,14 +9,16 @@ class SigavButton extends StatelessWidget {
   final bool? small;
   final bool? disabled;
   final bool? secondary;
+  final bool? loading;
   final bool? red;
 
   const SigavButton({
     required this.title,
     required this.action,
     this.small,
-    this.disabled,
+    this.disabled = false,
     this.secondary,
+    this.loading,
     this.red,
   });
 
@@ -31,32 +31,37 @@ class SigavButton extends StatelessWidget {
       mainColor = Colors.blue.shade400;
     }
 
-    return Container(
-      width: double.infinity,
-      height: small == true ? 40 : null,
-      decoration: BoxDecoration(
-        color: secondary == true ? null : mainColor,
-        border: secondary == true ? Border.all(color: mainColor) : null,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: InkWell(
-        onTap: () {
-          action();
-        },
-        // onTap: () {
-        //   Navigator.push(
-        //       context, MaterialPageRoute(builder: (context) => ClassPage()));
-        //   // Navigator.push(context,
-        //   //     MaterialPageRoute(builder: (context) => FinishSigninPage()));
-        // },
-        child: Padding(
-          padding: small == true ? EdgeInsets.all(5) : EdgeInsets.all(20.0),
-          child: Center(
-            child: Text(title,
-                style: TextStyle(
-                    fontSize: small == true ? 18 : 20,
-                    fontWeight: FontWeight.bold,
-                    color: secondary == true ? mainColor : Colors.white)),
+    return Opacity(
+      opacity: disabled! ? 0.5 : 1,
+      child: Container(
+        width: double.infinity,
+        height: small == true ? 40 : 67,
+        decoration: BoxDecoration(
+          color: secondary == true ? null : mainColor,
+          border: secondary == true ? Border.all(color: mainColor) : null,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: InkWell(
+          onTap: () {
+            if (!disabled!) action();
+          },
+          child: Padding(
+            padding: small == true ? EdgeInsets.all(5) : EdgeInsets.all(20.0),
+            child: Center(
+              child: loading == true
+                  ? SizedBox(
+                      height: small == true ? 18 : 27,
+                      width: small == true ? 18 : 27,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(title,
+                      style: TextStyle(
+                          fontSize: small == true ? 18 : 20,
+                          fontWeight: FontWeight.bold,
+                          color: secondary == true ? mainColor : Colors.white)),
+            ),
           ),
         ),
       ),
@@ -84,7 +89,7 @@ class SigavCircleIcon extends StatelessWidget {
         height: 60,
         decoration: BoxDecoration(
             color: blue == true ? Colors.blue.shade400 : null,
-            border: blue == true ? null : Border.all(color: Colors.black26),
+            border: blue == true ? null : Border.all(color: Colors.white),
             borderRadius: BorderRadius.circular(30)),
         child: icon,
       ),

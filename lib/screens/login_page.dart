@@ -2,13 +2,19 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'dart:convert';
-
-// import 'package:f_list_ex/database_helper.dart';
-// import 'package:f_list_ex/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:sigav_app/helpers/database.dart';
+import 'package:sigav_app/helpers/sigav_defaults.dart';
+import 'package:sigav_app/models/session.dart';
+
 import 'package:sigav_app/screens/class_page.dart';
-import 'package:sigav_app/screens/signin_page.dart';
+import 'package:sigav_app/screens/login_add_page.dart';
+import 'package:sigav_app/widgets/sigav_body.dart';
 import 'package:sigav_app/widgets/sigav_button.dart';
+import 'package:sigav_app/widgets/sigav_dialog.dart';
+import 'package:sigav_app/widgets/sigav_field.dart';
+import 'package:sigav_app/widgets/sigav_inner.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -18,36 +24,88 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  List _todoList = [];
+  final SigavDB _dbSigav = SigavDB();
 
-  Map<String, dynamic> _lastRemoved = Map();
-  int _lastRemovedPos = 0;
+  bool _loading = true;
+  bool hidePassword = true;
 
-  TextEditingController _titleController = TextEditingController();
+  final TextEditingController _emailField = TextEditingController();
+  final TextEditingController _passwordField = TextEditingController();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   DatabaseHelper.retrieveDatabase().then((data) {
-  //     setState(() {
-  //       _todoList = json.decode(data);
-  //     });
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+
+    _emailField.text = "jackson@email.com";
+    _passwordField.text = "123";
+
+    _dbSigav.getSession().then((session) {
+      if (session != null) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => ClassPage(),
+          ),
+          (route) => false,
+        );
+      } else {
+        setState(() {
+          _loading = false;
+        });
+      }
+    });
+  }
+
+  void _login() async {
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      Map<String, String> body = {
+        'email': _emailField.text,
+        'password': _passwordField.text,
+      };
+
+      Uri uri = Uri.http(SigavDef.url, '/v1/user/login');
+
+      http.Response response = await http.post(
+        uri,
+        body: body,
+      );
+
+      Map<String, dynamic> result = json.decode(response.body);
+      if (result["success"]) {
+        Session session = Session(
+            token: result["token"], type: result["type"], name: result["name"]);
+        await _dbSigav.createSession(session);
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => ClassPage(),
+          ),
+          (route) => false,
+        );
+      } else {
+        sigavDialog(context, result["message"], 'error');
+      }
+      print(result);
+    } catch (e) {
+      sigavDialog(context, "Erro", "error");
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-          child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 18,
-        ),
-        color: Colors.grey[100],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+    return SigavInner(
+      children: [
+        SigavBody(
+          centered: true,
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -64,68 +122,50 @@ class _LoginPageState extends State<LoginPage> {
                         fontWeight: FontWeight.bold,
                         color: Colors.black54))),
             Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                    hintText: "Email",
-                    hintStyle: TextStyle(color: Colors.black26),
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.black26)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.black38))),
-                style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
-              ),
-            ),
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: SigavField(
+                  hint: 'Email',
+                  controller: _emailField,
+                )),
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
-              child: TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                    hintText: "Senha",
-                    hintStyle: TextStyle(color: Colors.black26),
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.black26)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.black38))),
-                style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
+              child: SigavField(
+                hint: 'Repetir senha',
+                controller: _passwordField,
+                hide: hidePassword,
+                rightIcon: Icon(
+                  hidePassword
+                      ? Icons.remove_red_eye
+                      : Icons.remove_red_eye_outlined,
+                  color: Colors.black26,
+                ),
+                rightIconAction: () => setState(() {
+                  hidePassword = !hidePassword;
+                }),
               ),
             ),
             Padding(
                 padding: const EdgeInsets.only(bottom: 26.0),
                 child: SigavButton(
+                  disabled: _loading,
+                  loading: _loading,
                   title: "Login",
-                  action: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ClassPage()));
-                  },
+                  action: () => _login(),
                 )),
-            Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: GestureDetector(
-                  onTap: () => {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => SigninPage()))
-                  },
-                  child: Text("Criar conta",
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54)),
-                ))
+            GestureDetector(
+              onTap: () => {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SigninPage()))
+              },
+              child: Text("Criar conta",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54)),
+            )
           ],
-        ),
-      )),
+        )
+      ],
     );
   }
 }

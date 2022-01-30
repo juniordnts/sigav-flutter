@@ -9,6 +9,8 @@ import 'package:sigav_app/widgets/sigav_button.dart';
 class SigavCard extends StatelessWidget {
   final String title;
   final String desc;
+  final String? code;
+  final String? registration;
   final Icon icon;
   final VoidCallback action1;
   final VoidCallback action2;
@@ -16,10 +18,12 @@ class SigavCard extends StatelessWidget {
 
   const SigavCard(
       {required this.title,
+      this.registration = null,
       required this.action1,
       required this.action2,
       required this.desc,
       required this.icon,
+      this.code = null,
       this.active = true});
 
   @override
@@ -29,7 +33,7 @@ class SigavCard extends StatelessWidget {
       child: Container(
         width: double.infinity,
         margin: EdgeInsets.only(
-          bottom: 20.0,
+          bottom: 16.0,
         ),
         decoration: BoxDecoration(
             // color: Colors.blue.shade400,
@@ -37,8 +41,7 @@ class SigavCard extends StatelessWidget {
             border: Border.all(color: Colors.black26)),
         child: InkWell(
           onTap: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => ClassPage()));
+            action2();
           },
           child: Padding(
             padding: const EdgeInsets.all(14.0),
@@ -58,6 +61,19 @@ class SigavCard extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black54)),
                       ),
+                      if (code != null) Spacer(),
+                      if (code != null)
+                        Icon(
+                          Icons.qr_code,
+                          color: Colors.black54,
+                        ),
+                      if (code != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(code!,
+                              style: TextStyle(
+                                  fontSize: 18, color: Colors.black54)),
+                        ),
                     ],
                   ),
                 ),
