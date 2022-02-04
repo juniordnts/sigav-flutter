@@ -2,6 +2,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:share/share.dart';
 import 'package:http/http.dart' as http;
 
@@ -15,6 +16,7 @@ import 'package:sigav_app/models/session.dart';
 import 'package:sigav_app/widgets/sigav_body.dart';
 import 'package:sigav_app/widgets/sigav_button.dart';
 import 'package:sigav_app/widgets/sigav_dialog.dart';
+import 'package:sigav_app/widgets/sigav_field.dart';
 import 'package:sigav_app/widgets/sigav_header.dart';
 import 'package:sigav_app/widgets/sigav_inner.dart';
 
@@ -147,12 +149,49 @@ class _ClassAddPageState extends State<ClassAddPage> {
     }
   }
 
+  void _apply() async {
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      Map<String, String> body = {
+        'registration': _nameField.text,
+      };
+
+      SigavApi request = SigavApi(
+          path: '/v1/student/group/apply',
+          body: body,
+          token: widget.session!.token);
+
+      Map<String, dynamic> result = await request.post();
+
+      if (result["success"]) {
+        await sigavDialog(context, result["message"], 'success');
+        Navigator.pop(context, true);
+      } else {
+        sigavDialog(context, result["message"], 'error');
+      }
+    } catch (e) {
+      print(e);
+      sigavDialog(context, "Erro", "error");
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SigavInner(
       children: [
         SigavHeader(
-          title: widget.item == null ? "Criar turma" : "Editar turma",
+          title: widget.item == null
+              ? widget.session!.type == "student"
+                  ? "Entrar na turma"
+                  : "Criar turma"
+              : "Editar turma",
           leftAction: () => Navigator.pop(context),
           leftIcon: Icon(
             Icons.arrow_back,
@@ -196,44 +235,31 @@ class _ClassAddPageState extends State<ClassAddPage> {
                   ],
                 ),
               ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 16.0),
-              child: TextField(
-                controller: _nameField,
-                decoration: InputDecoration(
-                    hintText: "Nome",
-                    hintStyle: TextStyle(color: Colors.black26),
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.black26)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.black38))),
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 16.0),
-              child: TextField(
-                controller: _descField,
-                decoration: InputDecoration(
-                    hintText: "Descrição",
-                    hintStyle: TextStyle(color: Colors.black26),
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.black26)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(color: Colors.black38))),
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
-              ),
-            ),
+            if (widget.session!.type == "student")
+              Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: SigavField(
+                    rightIcon: Icon(
+                      Icons.qr_code,
+                      color: Colors.black38,
+                    ),
+                    hint: 'Código',
+                    controller: _nameField,
+                  )),
+            if (widget.session!.type != "student")
+              Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: SigavField(
+                    hint: 'Nome',
+                    controller: _nameField,
+                  )),
+            if (widget.session!.type != "student")
+              Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: SigavField(
+                    hint: 'Descrição',
+                    controller: _descField,
+                  )),
             if (widget.item != null)
               Padding(
                 padding: EdgeInsets.only(bottom: 16.0),
@@ -257,35 +283,26 @@ class _ClassAddPageState extends State<ClassAddPage> {
                   ],
                 ),
               ),
-            // if (widget.item != null)
-            //   Padding(
-            //     padding: const EdgeInsets.only(bottom: 16.0),
-            //     child: Row(
-            //       children: [
-            //         Icon(
-            //           Icons.qr_code,
-            //           color: Colors.black54,
-            //         ),
-            //         Padding(
-            //           padding: const EdgeInsets.only(left: 8),
-            //           child: Text(widget.item!['registration'],
-            //               style:
-            //                   TextStyle(fontSize: 18, color: Colors.black54)),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
             Padding(
                 padding: EdgeInsets.only(bottom: 16.0),
                 child: SigavButton(
                   disabled: _loadingDelete || _loading,
                   loading: _loading,
-                  title: widget.item == null ? "Criar" : "Editar",
+                  title: widget.item == null
+                      ? widget.session!.type == "student"
+                          ? "Solicitar"
+                          : "Criar"
+                      : "Editar",
                   action: () {
-                    if (widget.item == null) {
-                      _create();
+                    print(widget.session!.type);
+                    if (widget.session!.type == "student") {
+                      _apply();
                     } else {
-                      _edit();
+                      if (widget.item == null) {
+                        _create();
+                      } else {
+                        _edit();
+                      }
                     }
                   },
                 )),

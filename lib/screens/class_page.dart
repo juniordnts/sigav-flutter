@@ -29,9 +29,9 @@ class ClassPage extends StatefulWidget {
 class _ClassPageState extends State<ClassPage> {
   final SigavDB _dbSigav = SigavDB();
 
-  List _classList = [];
+  List itemList = [];
 
-  Session? _session = null;
+  Session? _session = Session(token: "", name: "", type: "");
   bool _loading = false;
   bool _closedClasses = false;
 
@@ -42,14 +42,14 @@ class _ClassPageState extends State<ClassPage> {
       setState(() {
         _session = session;
       });
-      _getClasses();
+      _getItems();
     });
   }
 
-  void _getClasses() async {
+  void _getItems() async {
     setState(() {
       _loading = true;
-      _classList = [];
+      itemList = [];
     });
 
     try {
@@ -60,14 +60,14 @@ class _ClassPageState extends State<ClassPage> {
       }
 
       SigavApi request = SigavApi(
-          path: '/v1/professor/group/all',
+          path: '/v1/' + _session!.type + '/group/all',
           query: query,
           token: _session!.token);
 
       Map<String, dynamic> result = await request.get();
       if (result["success"]) {
         setState(() {
-          _classList = result["response"];
+          itemList = result["response"];
         });
       } else {
         sigavDialog(context, result["message"], 'error');
@@ -99,20 +99,27 @@ class _ClassPageState extends State<ClassPage> {
       children: [
         SigavHeader(
           title: "Turmas",
-          subTitle:
-              "Olá, professor " + (_session != null ? _session!.name : ""),
+          subTitle: "Olá, " +
+              (_session!.type == 'professor' ? "professor " : "aluno ") +
+              (_session != null ? _session!.name : ""),
           leftAction: () => _logout(),
           leftIcon: Icon(
-            Icons.menu,
+            Icons.logout,
             color: Colors.white,
           ),
-          rightAction: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ClassAddPage(session: _session)))
-              .then((value) {
-            if (value) _getClasses();
-          }),
+          rightAction: () {
+            // if (_session!.type == 'professor') {
+            Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ClassAddPage(session: _session)))
+                .then((value) {
+              if (value) _getItems();
+            });
+            // } else {
+
+            // }
+          },
           rightIcon: Icon(
             Icons.add,
             color: Colors.white,
@@ -131,7 +138,7 @@ class _ClassPageState extends State<ClassPage> {
                       setState(() {
                         _closedClasses = value;
                       });
-                      _getClasses();
+                      _getItems();
                     },
                   ),
                   Padding(
@@ -151,7 +158,7 @@ class _ClassPageState extends State<ClassPage> {
                   color: Colors.blue.shade400,
                 ),
               )),
-            ...(_classList.map((item) {
+            ...(itemList.map((item) {
               return Padding(
                 padding: EdgeInsets.only(bottom: 20),
                 child: SigavCard(
@@ -159,6 +166,7 @@ class _ClassPageState extends State<ClassPage> {
                     active: item["active"],
                     registration: item["registration"],
                     title: item["name"],
+                    student: _session!.type == "student",
                     action1: () {
                       print(item);
                       Navigator.push(
@@ -168,14 +176,17 @@ class _ClassPageState extends State<ClassPage> {
                                     item: item,
                                     session: _session,
                                   ))).then((value) {
-                        if (value) _getClasses();
+                        if (value) _getItems();
                       });
                     },
                     action2: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ClassDetailPage()));
+                              builder: (context) => ClassDetailPage(
+                                    session: _session,
+                                    item: item,
+                                  )));
                     },
                     desc: item["description"],
                     icon: Icon(

@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:sigav_app/widgets/sigav_button.dart';
 
-class SigavHeader extends StatelessWidget {
+class SigavHeader extends StatefulWidget {
   final String? title;
   final String? subTitle;
   final List<Widget>? customTitle;
@@ -14,29 +14,43 @@ class SigavHeader extends StatelessWidget {
   final Icon? rightIcon;
 
   const SigavHeader(
-      {this.title,
+      {Key? key,
+      this.title,
       this.subTitle,
       this.customTitle = const [],
       this.leftAction,
       this.rightAction,
       this.leftIcon,
-      this.rightIcon});
+      this.rightIcon})
+      : super(key: key);
+
+  @override
+  _SigavHeaderState createState() => _SigavHeaderState();
+}
+
+class _SigavHeaderState extends State<SigavHeader>
+    with SingleTickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   Widget? _getLeftButton() {
-    if (leftAction != null) {
+    if (widget.leftAction != null) {
       return Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: SigavCircleIcon(action: () => leftAction!(), icon: leftIcon!));
+          child: SigavCircleIcon(
+              action: () => widget.leftAction!(), icon: widget.leftIcon!));
     }
     return Spacer();
   }
 
   Widget? _getRightButton() {
-    if (rightAction != null) {
+    if (widget.rightAction != null) {
       return Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child:
-              SigavCircleIcon(action: () => rightAction!(), icon: rightIcon!));
+          child: SigavCircleIcon(
+              action: () => widget.rightAction!(), icon: widget.rightIcon!));
     }
     return Spacer();
   }
@@ -62,16 +76,16 @@ class SigavHeader extends StatelessWidget {
               _getRightButton()!,
             ],
           ),
-          if (title != null)
-            Text(title!,
+          if (widget.title != null)
+            Text(widget.title!,
                 style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: Colors.white)),
-          if (subTitle != null)
-            Text(subTitle!,
+          if (widget.subTitle != null)
+            Text(widget.subTitle!,
                 style: const TextStyle(fontSize: 20, color: Colors.white)),
-          ...customTitle!
+          ...widget.customTitle!,
         ],
       ),
     );

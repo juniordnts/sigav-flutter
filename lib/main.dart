@@ -1,9 +1,12 @@
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/services.dart';
 import 'package:sigav_app/screens/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
+  initializeDateFormatting('pt_BR', null);
   runApp(MyApp());
 }
 

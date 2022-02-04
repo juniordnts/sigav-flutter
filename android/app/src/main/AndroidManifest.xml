@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.sigav_app">
    <application
-        android:label="sigav_app"
+        android:label="Sigav"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
