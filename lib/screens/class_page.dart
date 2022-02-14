@@ -2,6 +2,8 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +33,7 @@ class _ClassPageState extends State<ClassPage> {
 
   List itemList = [];
 
-  Session? _session = Session(token: "", name: "", type: "");
+  Session? _session = Session(token: "", name: "", type: "", userId: "");
   bool _loading = false;
   bool _closedClasses = false;
 
@@ -102,13 +104,14 @@ class _ClassPageState extends State<ClassPage> {
           subTitle: "Olá, " +
               (_session!.type == 'professor' ? "professor " : "aluno ") +
               (_session != null ? _session!.name : ""),
-          leftAction: () => _logout(),
+          leftAction: () {
+            _logout();
+          },
           leftIcon: Icon(
             Icons.logout,
             color: Colors.white,
           ),
           rightAction: () {
-            // if (_session!.type == 'professor') {
             Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -116,9 +119,6 @@ class _ClassPageState extends State<ClassPage> {
                 .then((value) {
               if (value) _getItems();
             });
-            // } else {
-
-            // }
           },
           rightIcon: Icon(
             Icons.add,
@@ -168,7 +168,6 @@ class _ClassPageState extends State<ClassPage> {
                     title: item["name"],
                     student: _session!.type == "student",
                     action1: () {
-                      print(item);
                       Navigator.push(
                           context,
                           MaterialPageRoute(

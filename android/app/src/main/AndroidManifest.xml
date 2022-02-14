@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.sigav_app">
+    package="com.sigav.dnts">
    <application
+        android:usesCleartextTraffic="true"
         android:label="Sigav"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -18,6 +19,11 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+
+            <meta-data
+              android:name="com.google.firebase.messaging.default_notification_icon"
+              android:resource="@drawable/app_icon" />
+              
             <!-- Displays an Android View that continues showing the launch screen
                  Drawable until Flutter paints its first frame, then this splash
                  screen fades out. A splash screen is useful to avoid any visual

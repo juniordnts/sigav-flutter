@@ -1,4 +1,4 @@
-package com.example.sigav_app
+package com.sigav.dnts
 
 import io.flutter.embedding.android.FlutterActivity
 

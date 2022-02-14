@@ -243,6 +243,7 @@ class _ClassAddPageState extends State<ClassAddPage> {
                       Icons.qr_code,
                       color: Colors.black38,
                     ),
+                    rightIconAction: () {},
                     hint: 'Código',
                     controller: _nameField,
                   )),

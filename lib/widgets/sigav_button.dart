@@ -53,7 +53,7 @@ class SigavButton extends StatelessWidget {
                       height: small == true ? 18 : 27,
                       width: small == true ? 18 : 27,
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: secondary == true ? mainColor : Colors.white,
                       ),
                     )
                   : Text(title,

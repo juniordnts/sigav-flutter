@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sigav_app/helpers/scroll_glow.dart';
 import 'package:sigav_app/helpers/sigav_api.dart';
 import 'package:sigav_app/models/session.dart';
 import 'package:sigav_app/screens/meet_add_page.dart';
@@ -268,72 +269,85 @@ class _SigavPresenceListState extends State<SigavPresenceList> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-          top: 18,
-          left: 18,
-          right: 18,
-          bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.format_list_numbered,
-                  color: Colors.black54,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text("Lista de presença",
-                      style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54)),
-                ),
-              ],
-            ),
-          ),
-          Divider(
-            height: 20,
-            thickness: 1,
-            color: Colors.black26,
-          ),
-          if (_loading)
-            Center(
-                child: Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: CircularProgressIndicator(
-                color: Colors.blue.shade400,
-              ),
-            )),
-          ...(itemList.map((item) {
-            return Padding(
+    return FractionallySizedBox(
+      heightFactor: 0.8,
+      child: Padding(
+        padding: EdgeInsets.only(
+            top: 18,
+            left: 18,
+            right: 18,
+            bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
               child: Row(
                 children: [
                   Icon(
-                    presence.contains(item['_id'])
-                        ? Icons.check_circle
-                        : Icons.remove,
-                    color: presence.contains(item['_id'])
-                        ? Colors.blue.shade400
-                        : Colors.black38,
+                    Icons.format_list_numbered,
+                    color: Colors.black54,
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(item['name'],
+                    child: Text("Lista de presença",
                         style: const TextStyle(
-                            fontSize: 18, color: Colors.black54)),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54)),
                   ),
                 ],
               ),
-            );
-          }).toList()),
-        ],
+            ),
+            Divider(
+              height: 20,
+              thickness: 1,
+              color: Colors.black26,
+            ),
+            if (_loading)
+              Center(
+                  child: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: CircularProgressIndicator(
+                  color: Colors.blue.shade400,
+                ),
+              )),
+            Expanded(
+                child: ScrollConfiguration(
+              behavior: NoScrollGlow(),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ...(itemList.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Row(
+                          children: [
+                            Icon(
+                              presence.contains(item['_id'])
+                                  ? Icons.check_circle
+                                  : Icons.remove,
+                              color: presence.contains(item['_id'])
+                                  ? Colors.blue.shade400
+                                  : Colors.black38,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Text(item['name'],
+                                  style: const TextStyle(
+                                      fontSize: 18, color: Colors.black54)),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList()),
+                  ],
+                ),
+              ),
+            )),
+          ],
+        ),
       ),
     );
   }
@@ -558,11 +572,15 @@ class _SigavQuestionState extends State<SigavQuestion> {
     });
 
     try {
-      Map<String, String> body = {
+      Map<String, dynamic> body = {
         "meetId": widget.item['_id'],
         "type": "question",
         "text": _textField.text,
       };
+
+      if (selectedDate != null) {
+        body["submit"] = selectedDate!.millisecondsSinceEpoch;
+      }
 
       if (file != null) {
         body['file'] = file ?? "";
@@ -654,7 +672,7 @@ class _SigavQuestionState extends State<SigavQuestion> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: Text("Adicionar quetão",
+                  child: Text("Adicionar questão",
                       style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -1025,50 +1043,55 @@ class _SigavAppliesState extends State<SigavApplies> {
               ),
             )),
           if (!_loading)
-            ...(itemList.asMap().entries.map((entry) {
-              int index = entry.key;
-              Map<String, dynamic> item = entry.value;
-              return Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Text(item['name'],
-                              style: const TextStyle(
-                                  fontSize: 18, color: Colors.black54)),
-                        ),
-                        Spacer(),
-                        InkWell(
-                          onTap: () {
-                            _update('reprove', item['_id'], index);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.delete,
-                              color: Colors.red.shade600,
+            Expanded(
+                child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  ...(itemList.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    Map<String, dynamic> item = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(item['name'],
+                                style: const TextStyle(
+                                    fontSize: 18, color: Colors.black54)),
+                          ),
+                          Spacer(),
+                          InkWell(
+                            onTap: () {
+                              _update('reprove', item['_id'], index);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.delete,
+                                color: Colors.red.shade600,
+                              ),
                             ),
                           ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            _update('aprove', item['_id'], index);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.check_circle,
-                              color: Colors.blue.shade400,
+                          InkWell(
+                            onTap: () {
+                              _update('aprove', item['_id'], index);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.check_circle,
+                                color: Colors.blue.shade400,
+                              ),
                             ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ));
-            }).toList()),
+                          )
+                        ],
+                      ),
+                    );
+                  }).toList()),
+                ],
+              ),
+            )),
         ],
       ),
     );

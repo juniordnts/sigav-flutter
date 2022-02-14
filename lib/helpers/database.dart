@@ -10,9 +10,7 @@ class SigavDB {
       join(await getDatabasesPath(), 'sigavDatabase.db'),
       onCreate: (db, version) async {
         await db.execute(
-            "CREATE TABLE session(id INTEGER PRIMARY KEY, token TEXT, name TEXT, type TEXT)");
-        // await db.execute(
-        //     "CREATE TABLE todo(id INTEGER PRIMARY KEY, taskId INTEGER, title TEXT, isDone INTEGER)");
+            "CREATE TABLE session(id INTEGER PRIMARY KEY, token TEXT, name TEXT, type TEXT, userId TEXT)");
 
         return;
       },
@@ -43,9 +41,11 @@ class SigavDB {
     List<Map<String, dynamic>> sessionMap = await _db.query('session');
     List<Session> sessionList = List.generate(sessionMap.length, (index) {
       return Session(
-          token: sessionMap[index]['token'],
-          name: sessionMap[index]['name'],
-          type: sessionMap[index]['type']);
+        token: sessionMap[index]['token'],
+        name: sessionMap[index]['name'],
+        type: sessionMap[index]['type'],
+        userId: sessionMap[index]['userId'],
+      );
     });
     if (sessionList.isNotEmpty) {
       return sessionList[0];

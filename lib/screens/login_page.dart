@@ -77,7 +77,10 @@ class _LoginPageState extends State<LoginPage> {
       Map<String, dynamic> result = json.decode(response.body);
       if (result["success"]) {
         Session session = Session(
-            token: result["token"], type: result["type"], name: result["name"]);
+            token: result["token"],
+            type: result["type"],
+            name: result["name"],
+            userId: result["_id"]);
         await _dbSigav.createSession(session);
 
         Navigator.pushAndRemoveUntil(
@@ -92,6 +95,7 @@ class _LoginPageState extends State<LoginPage> {
       }
       print(result);
     } catch (e) {
+      print(e);
       sigavDialog(context, "Erro", "error");
     } finally {
       setState(() {

@@ -180,11 +180,10 @@ class _MeetDetailPageState extends State<MeetDetailPage> {
                   color: Colors.white,
                   size: 32,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
+                Expanded(
                   child: Text(widget.item["name"],
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)),
@@ -312,6 +311,7 @@ class _MeetDetailPageState extends State<MeetDetailPage> {
             ...(itemList.map((item) {
               return SigavCardAction(
                 item: item,
+                session: widget.session!,
                 // type: item['type'],
                 // title: typeList[item['type']] ?? "Tipo Desconhecido",
                 // desc: item['text'],
